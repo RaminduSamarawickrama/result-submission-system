@@ -10,6 +10,7 @@ import Typography from '@material-ui/core/Typography';
 import {TextField} from "@material-ui/core";
 import {Grid} from "@material-ui/core";
 import S3FileUpload from 'react-s3';
+import {config} from '../configuration/config'
 
 function Copyright() {
     return (
@@ -65,27 +66,23 @@ const useStyles = makeStyles((theme) => ({
 
 export default function StudentFileUpload () {
 
-    const config = {
-        bucketName: 'evaluation-papers',
-        region: 'ap-southeast-1',
-        accessKeyId: 'AKIAQ2UM3CE5ROXXQPZO',
-        secretAccessKey: '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',
-    };
-
-    const [fileName,setFileName] = useState('');
     const [file,setFile] = useState({});
 
     const fileSelected = (e) =>{
-        setFileName(e.target.files[0].name);
-        console.log(e.target.files[0].name);
         setFile(e.target.files[0]);
     };
     const btnProceedClicked = () => {
-        console.log(file);
-        S3FileUpload
-            .uploadFile(file, config)
-            .then(data => console.log(data))
-            .catch(err => console.error(err))
+        if(!file.name){
+            alert('Upload a file before proceeding!');
+        }else{
+            S3FileUpload
+                .uploadFile(file, config)
+                .then(data => {
+                    alert(`Successfully submitted ${data.key}`);
+                    setFile({});
+                })
+                .catch(err => alert('An error occurred, document not submitted'))
+        }
     };
     const classes = useStyles();
 
@@ -116,7 +113,7 @@ export default function StudentFileUpload () {
                             </Grid>
                             <Grid item xs={6}>
                                 <Button component="label" >
-                                    {fileName? fileName : 'Click here to upload'}
+                                    {file.name? file.name : 'Click here to upload'}
                                     <input type="file" style={{ display: "none" }} onChange={fileSelected}/>
                                 </Button>
                             </Grid>
